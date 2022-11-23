@@ -1,1 +1,4 @@
-export class CreateAthleteDto {}
+export class CreateAthleteDto {
+    firstname: String;
+    lastname: String;
+}

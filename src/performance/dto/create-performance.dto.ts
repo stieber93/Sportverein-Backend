@@ -1,1 +1,5 @@
-export class CreatePerformanceDto {}
+export class CreatePerformanceDto {
+    reachedPerformance: String;
+
+    trainingSessionId: number;
+}
