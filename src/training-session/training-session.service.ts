@@ -18,11 +18,16 @@ export class TrainingSessionService {
   }
 
   findAll(): Promise<TrainingSession[]> {
-    return this.trainingSessionRepository.find();
+    return this.trainingSessionRepository.find({
+      relations: ["athlete", "sport"]
+    });
   }
 
   async findOne(id: number): Promise<TrainingSession> {
-    const found = await this.trainingSessionRepository.findOneBy({ id });
+    const found = await this.trainingSessionRepository.findOne({
+      where: {id},
+      relations: ["athlete", "sport"]
+    });
     if (!found) {
       throw new NotFoundException(`Trainingseinheit mit der ID: "${id}" konnte nicht gefunden werden!`);
     } else {

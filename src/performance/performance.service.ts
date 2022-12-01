@@ -18,11 +18,16 @@ export class PerformanceService {
   }
 
   findAll(): Promise<Performance[]> {
-    return this.performanceRepository.find();
+    return this.performanceRepository.find({
+      relations: ["trainingSession"]
+    });
   }
 
   async findOne(id: number): Promise<Performance> {
-    const found = await this.performanceRepository.findOneBy({ id });
+    const found = await this.performanceRepository.findOne({
+      where: {id},
+      relations: ["trainingSession"]
+    });
     if (!found) {
       throw new NotFoundException(`Leistung mit der ID: "${id}" konnte nicht gefunden werden!`);
     } else {
