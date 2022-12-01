@@ -9,7 +9,7 @@ export class TrainingSession {
     id: number;
 
     @Column()
-    date: Date;
+    date: String;
 
     @Column()
     startTime: String;
@@ -18,10 +18,10 @@ export class TrainingSession {
     endTime: String;
 
     //Relations
-    @ManyToOne(() => Athlete, (athlete) => athlete.id)
+    @ManyToOne(() => Athlete, (athlete) => athlete.id, {onDelete: "SET NULL"})
     athlete: Athlete
 
-    @ManyToOne(() => Sport, (sport) => sport.id)
+    @ManyToOne(() => Sport, (sport) => sport.id, {onDelete: "SET NULL"})
     sport: Sport
 
     @OneToMany(() => Performance, (performance) => performance.trainingSession)

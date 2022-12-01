@@ -1,26 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
+import { Sport } from './entities/sport.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class SportService {
-  create(createSportDto: CreateSportDto) {
-    return 'This action adds a new sport';
+  constructor(
+    @InjectRepository(Sport)
+    private sportRepository: Repository<Sport>,
+  ) {}
+
+  create(createSportDto: CreateSportDto): Promise<Sport> {
+    const newSport = this.sportRepository.create(createSportDto);
+    return this.sportRepository.save(newSport);;
   }
 
-  findAll() {
-    return `This action returns all sport`;
+  findAll(): Promise<Sport[]> {
+    return this.sportRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} sport`;
+  async findOne(id: number): Promise<Sport> {
+    const found = await this.sportRepository.findOneBy({ id });
+    if (!found) {
+      throw new NotFoundException(`Sport mit der ID: "${id}" konnte nicht gefunden werden!`)
+    } else {
+      return found;
+    }
   }
 
-  update(id: number, updateSportDto: UpdateSportDto) {
-    return `This action updates a #${id} sport`;
+  async update(id: number, updateSportDto: UpdateSportDto): Promise<Sport> {
+    const sport = await this.findOne(id);
+    sport.title = updateSportDto.title;
+    return this.sportRepository.save(sport);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} sport`;
+  async remove(id: number): Promise<void> {
+    await this.sportRepository.delete(id);
   }
 }

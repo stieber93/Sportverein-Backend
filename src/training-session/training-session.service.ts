@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrainingSessionDto } from './dto/create-training-session.dto';
 import { UpdateTrainingSessionDto } from './dto/update-training-session.dto';
+import { TrainingSession } from './entities/training-session.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TrainingSessionService {
-  create(createTrainingSessionDto: CreateTrainingSessionDto) {
-    return 'This action adds a new trainingSession';
+  constructor(
+    @InjectRepository(TrainingSession)
+    private trainingSessionRepository: Repository<TrainingSession>,
+  ) {}
+
+  create(createTrainingSessionDto: CreateTrainingSessionDto): Promise<TrainingSession> {
+    const newTrainingSession = this.trainingSessionRepository.create(createTrainingSessionDto);
+    return this.trainingSessionRepository.save(newTrainingSession);
   }
 
-  findAll() {
-    return `This action returns all trainingSession`;
+  findAll(): Promise<TrainingSession[]> {
+    return this.trainingSessionRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} trainingSession`;
+  async findOne(id: number): Promise<TrainingSession> {
+    const found = await this.trainingSessionRepository.findOneBy({ id });
+    if (!found) {
+      throw new NotFoundException(`Trainingseinheit mit der ID: "${id}" konnte nicht gefunden werden!`);
+    } else {
+      return found;
+    }
   }
 
-  update(id: number, updateTrainingSessionDto: UpdateTrainingSessionDto) {
-    return `This action updates a #${id} trainingSession`;
+  async update(id: number, updateTrainingSessionDto: UpdateTrainingSessionDto): Promise<TrainingSession> {
+    const trainingSession = await this.findOne(id);
+    trainingSession.date = updateTrainingSessionDto.date;
+    trainingSession.startTime = updateTrainingSessionDto.startTime;
+    trainingSession.endTime = updateTrainingSessionDto.endTime;
+    return this.trainingSessionRepository.save(trainingSession);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} trainingSession`;
+  async remove(id: number): Promise<void> {
+    await this.trainingSessionRepository.delete(id);
   }
 }

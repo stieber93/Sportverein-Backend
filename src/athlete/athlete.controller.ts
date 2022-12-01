@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AthleteService } from './athlete.service';
 import { CreateAthleteDto } from './dto/create-athlete.dto';
 import { UpdateAthleteDto } from './dto/update-athlete.dto';
+import { Athlete } from './entities/athlete.entity';
 
 @Controller('athlete')
 export class AthleteController {
@@ -13,7 +14,7 @@ export class AthleteController {
   }
 
   @Get()
-  findAll() {
+  async findAll(): Promise<Athlete[]> {
     return this.athleteService.findAll();
   }
 

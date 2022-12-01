@@ -1,5 +1,5 @@
 export class CreateTrainingSessionDto {
-    date: Date;
+    date: String;
     startTime: String;
     endTime: String;
 

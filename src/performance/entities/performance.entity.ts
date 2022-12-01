@@ -10,6 +10,6 @@ export class Performance {
     reachedPerformance: String;
 
     //Relations
-    @ManyToOne(() => TrainingSession, (trainingSession) => trainingSession.id)
+    @ManyToOne(() => TrainingSession, (trainingSession) => trainingSession.id, {onDelete: "SET NULL"})
     trainingSession: TrainingSession
 }
