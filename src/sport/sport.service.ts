@@ -12,16 +12,18 @@ export class SportService {
     private sportRepository: Repository<Sport>,
   ) {}
 
-  create(createSportDto: CreateSportDto): Promise<Sport> {
-    const newSport = this.sportRepository.create(createSportDto);
-    return this.sportRepository.save(newSport);;
+  create(createSportDto: CreateSportDto) {
+    const newSport = this.sportRepository.create({
+      title: createSportDto.title,
+    });
+    return this.sportRepository.save(newSport);
   }
 
-  findAll(): Promise<Sport[]> {
+  findAll() {
     return this.sportRepository.find();
   }
 
-  async findOne(id: number): Promise<Sport> {
+  async findOne(id: number) {
     const found = await this.sportRepository.findOneBy({ id });
     if (!found) {
       throw new NotFoundException(`Sport mit der ID: "${id}" konnte nicht gefunden werden!`)
@@ -29,14 +31,14 @@ export class SportService {
       return found;
     }
   }
-
-  async update(id: number, updateSportDto: UpdateSportDto): Promise<Sport> {
+  
+  async update(id: number, updateSportDto: UpdateSportDto) {
     const sport = await this.findOne(id);
-    sport.title = updateSportDto.title;
-    return this.sportRepository.save(sport);
+    return this.sportRepository.save({ ...sport, ...updateSportDto});
   }
 
-  async remove(id: number): Promise<void> {
-    await this.sportRepository.delete(id);
+  async remove(id: number) {
+    const sport = await this.findOne(id);
+    return this.sportRepository.remove(sport);
   }
 }

@@ -11,22 +11,38 @@ export class TrainingSessionService {
     @InjectRepository(TrainingSession)
     private trainingSessionRepository: Repository<TrainingSession>,
   ) {}
-
-  create(createTrainingSessionDto: CreateTrainingSessionDto): Promise<TrainingSession> {
-    const newTrainingSession = this.trainingSessionRepository.create(createTrainingSessionDto);
+  
+  create(createTrainingSessionDto: CreateTrainingSessionDto) {
+    const newTrainingSession = this.trainingSessionRepository.create({
+      date: createTrainingSessionDto.date,
+      startTime: createTrainingSessionDto.startTime,
+      endTime: createTrainingSessionDto.endTime,
+      athlete: {
+        id: createTrainingSessionDto.athleteId,
+      },
+      sport: {
+        id: createTrainingSessionDto.sportId,
+      },
+    });
     return this.trainingSessionRepository.save(newTrainingSession);
   }
 
-  findAll(): Promise<TrainingSession[]> {
+  findAll() {
     return this.trainingSessionRepository.find({
-      relations: ["athlete", "sport"]
+      relations: {
+        athlete: true,
+        sport: true,
+      }
     });
   }
 
-  async findOne(id: number): Promise<TrainingSession> {
-    const found = await this.trainingSessionRepository.findOne({
+  findOne(id: number) {
+    const found = this.trainingSessionRepository.findOne({
       where: {id},
-      relations: ["athlete", "sport"]
+      relations: {
+        athlete: true,
+        sport: true,
+      }
     });
     if (!found) {
       throw new NotFoundException(`Trainingseinheit mit der ID: "${id}" konnte nicht gefunden werden!`);
@@ -35,15 +51,13 @@ export class TrainingSessionService {
     }
   }
 
-  async update(id: number, updateTrainingSessionDto: UpdateTrainingSessionDto): Promise<TrainingSession> {
+  async update(id: number, updateTrainingSessionDto: UpdateTrainingSessionDto) {
     const trainingSession = await this.findOne(id);
-    trainingSession.date = updateTrainingSessionDto.date;
-    trainingSession.startTime = updateTrainingSessionDto.startTime;
-    trainingSession.endTime = updateTrainingSessionDto.endTime;
-    return this.trainingSessionRepository.save(trainingSession);
+    return this.trainingSessionRepository.save({ ...trainingSession, ...updateTrainingSessionDto});
   }
 
-  async remove(id: number): Promise<void> {
-    await this.trainingSessionRepository.delete(id);
+  async remove(id: number) {
+    const trainingSession = await this.findOne(id);
+    return this.trainingSessionRepository.remove(trainingSession);
   }
 }

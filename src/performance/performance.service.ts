@@ -12,21 +12,30 @@ export class PerformanceService {
     private performanceRepository: Repository<Performance>,
   ) {}
 
-  create(createPerformanceDto: CreatePerformanceDto): Promise<Performance> {
-    const newPerformance = this.performanceRepository.create(createPerformanceDto);
+  create(createPerformanceDto: CreatePerformanceDto) {
+    const newPerformance = this.performanceRepository.create({
+      reachedPerformance: createPerformanceDto.reachedPerformance,
+      trainingSession: {
+        id: createPerformanceDto.trainingSessionId,
+      },
+    });
     return this.performanceRepository.save(newPerformance);
   }
 
-  findAll(): Promise<Performance[]> {
+  findAll() {
     return this.performanceRepository.find({
-      relations: ["trainingSession"]
+      relations: {
+        trainingSession: true,
+      }
     });
   }
 
-  async findOne(id: number): Promise<Performance> {
+  async findOne(id: number) {
     const found = await this.performanceRepository.findOne({
       where: {id},
-      relations: ["trainingSession"]
+      relations: {
+        trainingSession: true,
+      }
     });
     if (!found) {
       throw new NotFoundException(`Leistung mit der ID: "${id}" konnte nicht gefunden werden!`);
@@ -34,14 +43,14 @@ export class PerformanceService {
       return found;
     }
   }
-
-  async update(id: number, updatePerformanceDto: UpdatePerformanceDto): Promise<Performance> {
+  
+  async update(id: number, updatePerformanceDto: UpdatePerformanceDto) {
     const performance = await this.findOne(id);
-    performance.reachedPerformance = updatePerformanceDto.reachedPerformance;
-    return this.performanceRepository.save(performance);
+    return this.performanceRepository.save({ ...performance, ...updatePerformanceDto});
   }
 
-  async remove(id: number): Promise<void> {
-    await this.performanceRepository.delete(id);
+  async remove(id: number) {
+    const performance = await this.findOne(id);
+    return this.performanceRepository.remove(performance);
   }
 }

@@ -19,8 +19,11 @@ export class AthleteService {
    * @param createAthleteDto 
    * @returns new created athlete
    */
-  create(createAthleteDto: CreateAthleteDto): Promise<Athlete> {
-    const newAthlete = this.athleteRepository.create(createAthleteDto); // creates new athlete
+  create(createAthleteDto: CreateAthleteDto) {
+    const newAthlete = this.athleteRepository.create({
+      firstname: createAthleteDto.firstname,
+      lastname: createAthleteDto.lastname
+    });
     return this.athleteRepository.save(newAthlete);
   }
 
@@ -29,7 +32,7 @@ export class AthleteService {
    * @author Steffen Reuter
    * @returns all athletes 
    */
-  findAll(): Promise<Athlete[]> {
+  findAll() {
     return this.athleteRepository.find();
   }
 
@@ -39,7 +42,7 @@ export class AthleteService {
    * @param id 
    * @returns a specific athlete or error if not found
    */
-  async findOne(id: number): Promise<Athlete> {
+  async findOne(id: number) {
     // searching a specific athelte --> if found, return this athlete / if not found, throw exception error
     const found = await this.athleteRepository.findOneBy({ id });
     if (!found) {
@@ -56,12 +59,9 @@ export class AthleteService {
    * @param updateAthleteDto 
    * @returns the updated athlete
    */
-  async update(id: number, updateAthleteDto: UpdateAthleteDto): Promise<Athlete> {
-    // searching a specific athlete by id --> changing one or more properties --> return updated athlete
+  async update(id: number, updateAthleteDto: UpdateAthleteDto) {
     const athlete = await this.findOne(id);
-    athlete.firstname = updateAthleteDto.firstname;
-    athlete.lastname = updateAthleteDto.lastname;
-    return this.athleteRepository.save(athlete);
+    return this.athleteRepository.save({ ...athlete, ...updateAthleteDto});
   }
 
   /**
@@ -69,7 +69,8 @@ export class AthleteService {
    * @author Steffen Reuter
    * @param id 
    */
-  async remove(id: number): Promise<void> {
-    await this.athleteRepository.delete(id);
+  async remove(id: number) {
+    const athlete = await this.findOne(id);
+    await this.athleteRepository.remove(athlete);
   }
 }
